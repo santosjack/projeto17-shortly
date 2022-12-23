@@ -1,4 +1,4 @@
-
+import connectionDB from '../database/db.js';
 import { userSchema, credentialsSchema } from "../models/Auth.js";
 
 
@@ -29,7 +29,7 @@ export async function signInBodyValidation(req, res, next) {
     return res.status(422).send(errors);
   }
 
-  res.locals.user = user;
+  res.locals.user = credentials;
 
   next();
 }
@@ -42,21 +42,20 @@ export async function authRoutesValidation(req, res, next) {
     return res.sendStatus(401);
   }
 
-/*   try {
-    const session = await sessions.findOne({ token });
-    if (!session) {
-      return res.sendStatus(401);
-    }
-    const user = await users.findOne({ _id: session?.userId });
-    if (!user) {
+  try {
+   
+    const { rows: session } = await connectionDB.query(
+      "SELECT * FROM sessions WHERE token = $1", [token]
+    );
+    if (session.length < 1) {
       return res.sendStatus(401);
     }
 
-    res.locals.user = user;
+    res.locals.user = session[0].userId;
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
-  } */
+  } 
 
   next();
 }

@@ -6,7 +6,11 @@ const { Pool } = pg;
 
 const connectionDB = new Pool({
   //connectionString: process.env.DATABASE_URL,
-  connectionString: "postgresql://postgres:31126245@localhost:5432/shortly",
+  host: "localhost",
+  port: "5432",
+  user: "postgres",
+  password: "31126245",
+  database: "shortly"
 });
 
 
