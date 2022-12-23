@@ -60,3 +60,42 @@ export async function signIn(req, res) {
   }
 }
 
+export async function getData(req, res) {
+  const userId = res.locals.user;
+  console.log("cheguei no controller");
+  try {
+
+      const { rows: foundUsers } = await connectionDB.query(
+        "SELECT * FROM users WHERE id = $1", [userId]
+      );
+
+      console.log(foundUsers);
+      if (foundUsers.length < 1) {
+        return res.status(404).send("Usuário não encontrado.")
+      }
+
+      const { rows: shortenedUrls } = await connectionDB.query(
+        'SELECT * FROM urls WHERE "userId" = $1', [userId]
+      );
+
+      console.log(shortenedUrls);
+      const { rows: amountOfVisits } = await connectionDB.query(
+        `SELECT SUM(u."visitCount") as "visitCount"
+        FROM users JOIN urls u ON users.id = u."userId"
+        WHERE users.id = $1
+        GROUP BY users.id`, [userId]
+      );
+      
+      res.status(200).send({
+        id: foundUsers[0].id,
+        name: foundUsers[0].name,
+        visitCount: amountOfVisits[0].visitCount,
+        shortenedUrls: shortenedUrls
+      });
+  } catch (error) {
+      res.sendStatus(500);
+  }
+}
+
+
+
