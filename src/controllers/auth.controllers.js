@@ -82,18 +82,25 @@ export async function getData(req, res) {
       'SELECT * FROM urls WHERE "userId" = $1', [userId]
     );
 
+    console.log(shortenedUrls);
+
+    let visitCount = 0;
+
     const { rows: amountOfVisits } = await connectionDB.query(
-      `SELECT SUM(u."visitCount") as "visitCount"
+      `SELECT SUM(COALESCE(u."visitCount", 0)) as "visitCount"
         FROM users JOIN urls u ON users.id = u."userId"
         WHERE users.id = $1
         GROUP BY users.id`, [userId]
     );
 
-    const visitCount = 0;
+    console.log(amountOfVisits)
+    
 
     if(amountOfVisits.length > 0){
       visitCount = amountOfVisits[0].visitCount;
     }
+
+    console.log(visitCount)
 
     res.status(200).send({
       id: foundUsers[0].id,
